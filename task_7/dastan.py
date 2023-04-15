@@ -486,7 +486,7 @@ class Player:
         return Temp.CheckIfThereIsAMoveToSquare(StartSquareReference, FinishSquareReference)
 
 def Main():
-    ThisGame = Dastan(8, 7, 5)
+    ThisGame = Dastan(6, 6, 4)
     ThisGame.PlayGame()
     print("Goodbye!")
     input()

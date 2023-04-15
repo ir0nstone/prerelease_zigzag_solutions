@@ -107,7 +107,7 @@ class Dastan:
         SelectedSquare = self.__GetValidInt("Enter the square " + Description + " (row number followed by column number): ",
                                             "Square invalid, please try again: ")
 
-        while not 1 <= SelectedSquare // 10 <= 8 or not 1 <= SelectedSquare % 10 <= 8:
+        while not 1 <= SelectedSquare // 10 <= 5 or not 1 <= SelectedSquare % 10 <= 5:
             SelectedSquare = self.__GetValidInt("Square is not on the board, please try again: ",
                                                 "Square invalid, please try again: ")
 
@@ -497,7 +497,7 @@ class Player:
         return Temp.CheckIfThereIsAMoveToSquare(StartSquareReference, FinishSquareReference)
 
 def Main():
-    ThisGame = Dastan(8, 7, 5)
+    ThisGame = Dastan(6, 6, 4)
     ThisGame.PlayGame()
     print("Goodbye!")
     input()
