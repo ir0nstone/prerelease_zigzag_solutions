@@ -125,3 +125,6 @@ dmypy.json
 
 # other stuff
 .idea/*
+
+# my stuff
+t_template/*

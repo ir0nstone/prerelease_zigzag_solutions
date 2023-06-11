@@ -3,29 +3,6 @@
 #written by the AQA Programmer Team
 #developed in the Python 3.9 programming environment
 
-# moves for testing:
-"""
-3
-23
-43
-
-1
-52
-51
-
-1
-25
-35
-
-1
-55
-44
-
-1
-22
-31
-"""
-
 import random
 
 class Dastan:
@@ -35,9 +12,6 @@ class Dastan:
         self._MoveOptionOffer = []
         self._Players.append(Player("Player One", 1))
         self._Players.append(Player("Player Two", -1))
-        # this is probably easiest
-        self._taziz = Taziz(None, "x")
-
         self.__CreateMoveOptions()
         self._NoOfRows = R
         self._NoOfColumns = C
@@ -174,22 +148,11 @@ class Dastan:
             MoveLegal = self._CurrentPlayer.CheckPlayerMove(Choice, StartSquareReference, FinishSquareReference)
             if MoveLegal:
                 PointsForPieceCapture = self.__CalculatePieceCapturePoints(FinishSquareReference)
-
-                # make move free if Taziz condition is met
-                # but only if it's the same player!
-                if not self._CurrentPlayer.SameAs(self._taziz.GetBelongsTo()) or not self._taziz.GetCampedTwoTurns():
-                    self._CurrentPlayer.ChangeScore(-(Choice + (2 * (Choice - 1))))
-
+                self._CurrentPlayer.ChangeScore(-(Choice + (2 * (Choice - 1))))
                 self._CurrentPlayer.UpdateQueueAfterMove(Choice)
                 self.__UpdateBoard(StartSquareReference, FinishSquareReference)
                 self.__UpdatePlayerScore(PointsForPieceCapture)
                 print("New score: " + str(self._CurrentPlayer.GetScore()) + "\n")
-
-                # increment Taziz counter
-                # we only want to increment it if the turn of the player!
-                if self._CurrentPlayer.SameAs(self._taziz.GetBelongsTo()):
-                    print("INCREMENTING PLAYER1'S TAZIZ COUNTER!")
-                    self._taziz.CheckCamp()
             if self._CurrentPlayer.SameAs(self._Players[0]):
                 self._CurrentPlayer = self._Players[1]
             else:
@@ -209,20 +172,18 @@ class Dastan:
         else:
             print(self._Players[1].GetName() + " is the winner!")
 
+    # modify __CreateBoard() to place Promotions in the right position
     def __CreateBoard(self):
-        # for placing taziz, we want it to be in center but should be closer to the left and to player 2 if necessary
-        # therefore, round the col down and the row up
-        taziz_row = (self._NoOfRows // 2) + 1
-        taziz_col = (self._NoOfColumns + 1) // 2
-
         for Row in range(1, self._NoOfRows + 1):
             for Column in range(1, self._NoOfColumns + 1):
                 if Row == 1 and Column == self._NoOfColumns // 2:
                     S = Kotla(self._Players[0], "K")
                 elif Row == self._NoOfRows and Column == self._NoOfColumns // 2 + 1:
                     S = Kotla(self._Players[1], "k")
-                elif Row == taziz_row and Column == taziz_col:
-                    S = self._taziz
+                elif Row == 1 and (Column == 1 or Column == self._NoOfColumns):
+                    S = Promotion(self._Players[1], 'p')
+                elif Row == self._NoOfRows and (Column == 1 or Column == self._NoOfColumns):
+                    S = Promotion(self._Players[0], 'P')
                 else:
                     S = Square()
                 self._Board.append(S)
@@ -347,8 +308,16 @@ class Piece:
         self._PointsIfCaptured = P
         self._Symbol = S
 
+    # allow us to set the symbol
+    def SetSymbol(self, S):
+        self._Symbol = S
+
     def GetSymbol(self):
         return self._Symbol
+
+    # allow us to be able to set the piece type
+    def SetTypeOfPiece(self, T):
+        self.T = T
 
     def GetTypeOfPiece(self):
         return self._TypeOfPiece
@@ -411,42 +380,17 @@ class Kotla(Square):
             else:
                 return 0
 
-class Taziz(Square):
+# make new class Promotion that extends from Square
+class Promotion(Square):
     def __init__(self, P, S):
-        super(Taziz, self).__init__()
+        super(Promotion, self).__init__()
         self._BelongsTo = P
         self._Symbol = S
-        self.__CampedTurns = 0
 
     def SetPiece(self, P):
-        self._PieceInSquare = P
-        self._BelongsTo = P.GetBelongsTo()
-
-        # override symbol
-        player = P.GetBelongsTo()
-        self._Symbol = "A" if player.GetDirection() == 1 else "a"
-
-    def RemovePiece(self):
-        self._Symbol = "x"
-        self.__CampedTurns = 0
-
-        PieceToReturn = self._PieceInSquare
-        self._PieceInSquare = None
-        return PieceToReturn
-
-    def GetCampedTwoTurns(self):
-        return self.__CampedTurns >= 2
-
-    def CheckCamp(self):
-        # check if the player is the same by comparing the symbol to the symbol we would expect
-        # this is a bit of a hack but it gets the job done
-        player = self.GetPieceInSquare().GetBelongsTo()
-
-        exp_symbol = "A" if player.GetDirection() == 1 else "a"
-
-        if exp_symbol == self._Symbol:
-            self.__CampedTurns += 1
-
+        P.SetTypeOfPiece('mirza')
+        P.SetSymbol('1' if self._Symbol == 'P' else '2')
+        super().SetPiece(P)
 
 class MoveOption:
     def __init__(self, N):
